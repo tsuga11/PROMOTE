@@ -1,14 +1,15 @@
-source("D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/scripts/promote_maps_w_hillshade.r")
-source("D:/Dropbox/TCSI/Scripts/emds/mpat_scores.r")
+source("./script/promote_maps_w_hillshade.r")
+source("./script/mpat_scores.r")
 
 cp <- function(){
   
   tcsi_dir <- paste0("D:/Dropbox/TCSI")
-  main_dir <- paste0(tcsi_dir, "/EMDS/Blueprint")
-  mask_015 <- rast(paste0(tcsi_dir, "/Data/Masks/mask_015m.tif"))
-  mask_landis <- rast(paste0(tcsi_dir, "/Data/Masks/mask_180m_landis.tif"))
-  b <- vect(paste0(tcsi_dir, "/Data/Boundaries/TCSI/tcsi_15m_bounds01.shp"))
-  quad_subdir <- "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple"
+  tif_dir <- paste0(tcsi_dir, '/tif')
+  
+  mask_015 <- rast(paste0(tif_dir, "/mask_015m.tif"))
+  mask_landis <- rast(paste0(tif_dir, "/mask_180m_landis.tif"))
+  b <- vect(paste0(tif_dir, "/tcsi_15m_bounds01.shp"))
+  quad_subdir <- paste0(tcsi_dir, "/Results/Carbon_Pillar_Simple")
   dir.create(quad_subdir)
   
   
@@ -17,10 +18,10 @@ cp <- function(){
   #
   print(paste0("STEP 1. Carbon --> ", date()))
   
-  cn_e01c <- rast(paste0("D:/Dropbox/TCSI/EMDS/Blueprint/carbon_seq_v4_liveC/carbon_current.tif"))
+  cn_e01c <- rast(paste0(tif_dir, "/carbon_current.tif"))
   
   # Change this to only a single metric for simplicity
-  cn_e01f <- rast(paste0("D:/Dropbox/TCSI/EMDS/Blueprint/carbon_seq_v4_liveC/carbon_future.tif"))
+  cn_e01f <- rast(paste0(tif_dir, "/carbon_future.tif"))
   
   cn_e01 <- rast(list(cn_e01c, cn_e01f))
   names(cn_e01) <- c('current', 'future')
@@ -47,30 +48,26 @@ cp <- function(){
   cn_scores <- quad_scores_xy(cn, dir_name = quad_subdir)
   timestamp()
   
+  dir.create(paste0(quad_subdir, '/tif'))
+  dir.create(paste0(quad_subdir, '/png'))
   
-  # single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/current.tif", f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/png/current_hillshade.png", l = T, lp = "bottomleft")
-  # single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/future.tif", f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/png/future_hillshade.png", l = F)
-  single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/current.tif", 
-             x2 = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/future.tif", 
-             f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Figures/Figure - Current - Future SOE.png", 
+  single_map(x = paste0(quad_subdir, "/tif/current.tif"), 
+             x2 = paste0(quad_subdir, "/tif/future.tif"), 
+             f = paste0(quad_subdir, "/png/Figure - Current - Future SOE.png"), 
              l = T, 
              lp = "bottomleft", 
              label = c("A", "B"))
   
-  # single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/ap.tif", f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/png/ap_hillshade.png", l = F)
-  # single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/ap_rescale.tif", f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/png/ap_rescale_hillshade.png", l = F)
-  single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/ap.tif", 
-             x2 = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/ap_rescale.tif", 
-             f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Figures/Figure - AdaptProtect.png", 
+  single_map(x = paste0(quad_subdir, "/tif/ap.tif"), 
+             x2 = paste0(quad_subdir, "/tif/ap_rescale.tif"), 
+             f = paste0(quad_subdir, "/png/Figure - AdaptProtect.png"), 
              l = T, 
              lp = "bottomleft", 
              label = c("A", "B"))
   
-  # for(i in c("monitor", "protect", "adapt", "transform"))
-  #   single_map(x = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/adapt.tif", f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/png/adapt_hillshade.png", l = F)
   
   # Composite strategy score (strong, weak)
-  s <- rast(paste0("D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Results/Carbon_Pillar_Simple/tif/", c("monitor.tif", "protect.tif", "adapt.tif", "transform.tif")))
+  s <- rast(paste0(quad_subdir, "/tif/", c("monitor.tif", "protect.tif", "adapt.tif", "transform.tif")))
   wm <- which.max(s)
   m <- max(s)
   wm1 <- wm * 10
@@ -89,7 +86,7 @@ cp <- function(){
   dl <- list(); for(i in 1:nrow(d)){dl[[i]] <- paste0(d[i, 1], d[i, 2])}
   lt <- unlist(dl)
   single_map(x = wms, 
-             f = "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change/Figures/strategy_score_hillshade.png", 
+             f = paste0(quad_subdir, "/png/strategy_score_hillshade.png"), 
              cols = cols, type = "classes", l = T, lp = "bottomleft", lt = lt)
   
   
