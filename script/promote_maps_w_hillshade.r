@@ -3,9 +3,10 @@ require(GEOmap)
 require(rasterVis)
 
 
-single_map <- function(x, x2, f, cols, type, l = T, lp = "topright", lt, label){
+single_map <- function(x, x2, f, cols, type, l = T, lp = "topright", lt, label, hillshade){
   
-    hill <- rast("D:/Dropbox/TCSI/Data/Topography/hillshade_tcsi_30m.tif")  
+    if(missing(hillshade))
+      hill <- rast(paste0("./tif/hillshade_tcsi_30m.tif"))
 
     #
     # Figure 8 - Current and Future SOE scores
@@ -99,7 +100,7 @@ maps <- function(){
   
   # Manuscript director
   out_dir <- "D:/Dropbox/TCSI/Manuscripts/DSS Climate Change"
-
+  
   hill <- rast("D:/Dropbox/TCSI/Data/Topography/hillshade_tcsi_30m.tif")  
   
   # Degrees minutes seconds
